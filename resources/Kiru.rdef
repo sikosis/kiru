@@ -17,7 +17,7 @@ resource file_types message {
 };
 
 
-resource(102, "KIRU:ABOUT_ICON") #'KICO' import "resources/Kiru-about.rgba";
+resource(102, "KIRU:ABOUT_ICON") #'KICO' import "Kiru-about.rgba";
 
 resource(101, "BEOS:L:STD_ICON") #'ICON' array {
 	$"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFF"
