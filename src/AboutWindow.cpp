@@ -115,9 +115,24 @@ AboutWindow::AboutWindow()
 	BResources* resources = BApplication::AppResources();
 	if (resources != nullptr) {
 		size_t resourceSize = 0;
-		const uint8* bitmapData = static_cast<const uint8*>(
-			resources->LoadResource(B_LARGE_ICON_TYPE, 101, &resourceSize));
-		if (bitmapData != nullptr) {
+		const uint8* colourData = static_cast<const uint8*>(
+			resources->LoadResource('KICO', 102, &resourceSize));
+		if (colourData != nullptr && resourceSize >= 64 * 64 * 4) {
+			icon = new BBitmap(BRect(0, 0, 63, 63), B_RGBA32);
+			if (icon->InitCheck() != B_OK) {
+				delete icon;
+				icon = nullptr;
+			} else {
+				for (int32 y = 0; y < 64; y++) {
+					std::memcpy(static_cast<uint8*>(icon->Bits())
+							+ y * icon->BytesPerRow(), colourData + y * 64 * 4,
+						64 * 4);
+				}
+			}
+		}
+		const uint8* bitmapData = static_cast<const uint8*>(resources->LoadResource(
+			B_LARGE_ICON_TYPE, 101, &resourceSize));
+		if (icon == nullptr && bitmapData != nullptr) {
 			icon = new BBitmap(BRect(0, 0, 31, 31), B_RGBA32);
 			if (icon->InitCheck() != B_OK) {
 				delete icon;
@@ -186,13 +201,11 @@ AboutWindow::AboutWindow()
 			"FFmpeg — external dependency; LGPL/GPL depending on build"))
 		.Add(new LinkView("ffmpeg link", "https://ffmpeg.org/", "https://ffmpeg.org/"))
 		.Add(new BStringView("icon credit",
-			"Scissors icon — Icons8 Windows Metro collection"))
-		.Add(new LinkView("icons8 link", "https://icons8.com/icon/713/scissors",
-			"https://icons8.com/icon/713/scissors"))
+			"Original BeOS-inspired axe-and-film icon"))
 		.AddStrut(5.0f)
 		.Add(thanksHeading)
 		.Add(new BStringView("thanks",
-			"The Haiku, FFmpeg and Icons8 communities."))
+			"The Haiku and FFmpeg communities."))
 		.AddGroup(B_HORIZONTAL, 0)
 			.AddGlue()
 			.Add(closeButton)

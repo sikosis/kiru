@@ -8,6 +8,7 @@
 #include <Alert.h>
 #include <Application.h>
 #include <Button.h>
+#include <Entry.h>
 #include <FilePanel.h>
 #include <GroupLayoutBuilder.h>
 #include <Menu.h>
@@ -15,6 +16,7 @@
 #include <MenuItem.h>
 #include <MessageRunner.h>
 #include <Path.h>
+#include <Roster.h>
 #include <Slider.h>
 #include <StringView.h>
 
@@ -255,12 +257,15 @@ KiruWindow::MessageReceived(BMessage* message)
 				BString text("Saved ");
 				text << output;
 				SetStatus(text.String());
+				UpdateInterface();
+				ShowCutFinished(output);
 			} else if (status == 127) {
 				SetStatus("FFmpeg was not found. Install it from HaikuDepot.");
 			} else {
 				SetStatus("FFmpeg could not chop this video.");
 			}
-			UpdateInterface();
+			if (status != 0)
+				UpdateInterface();
 			break;
 		}
 		default:
@@ -387,10 +392,13 @@ KiruWindow::Tick()
 {
 	if (!fPlaying || !fPlayer.IsOpen())
 		return;
-	bigtime_t end = fOutPoint > fInPoint && fInPoint >= 0 ? fOutPoint : fPlayer.Duration();
+	bool hasSelection = fOutPoint > fInPoint && fInPoint >= 0;
+	bigtime_t end = hasSelection ? fOutPoint : fPlayer.Duration();
 	bigtime_t frameDuration = std::max<bigtime_t>(1,
 		static_cast<bigtime_t>(1000000.0f / fPlayer.FrameRate()));
-	bigtime_t finalFramePosition = std::max<bigtime_t>(0, end - frameDuration);
+	bigtime_t endSafetyMargin = hasSelection
+		? frameDuration : std::max<bigtime_t>(frameDuration * 3, 100000);
+	bigtime_t finalFramePosition = std::max<bigtime_t>(0, end - endSafetyMargin);
 	if (fPlayer.Position() >= finalFramePosition || fPlayer.ReadFrame() != B_OK) {
 		fPlaying = false;
 		Seek(fInPoint >= 0 && fOutPoint > fInPoint ? fInPoint : 0);
@@ -407,6 +415,76 @@ KiruWindow::ShowAbout()
 {
 	AboutWindow* window = new AboutWindow();
 	window->Show();
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+void
+KiruWindow::ShowCutFinished(const char* output)
+{
+	BPath outputPath(output);
+	BString text("Saved ");
+	text << outputPath.Leaf() << ".\n\nWhat would you like to do?";
+	BAlert* alert = new BAlert("Chop finished", text.String(), "Done",
+		"Open in MediaPlayer", "Show in Tracker", B_WIDTH_AS_USUAL, B_INFO_ALERT);
+	alert->SetShortcut(0, B_ESCAPE);
+	alert->SetShortcut(1, B_ENTER);
+	int32 choice = alert->Go();
+	status_t status = B_OK;
+	if (choice == 1)
+		status = OpenInMediaPlayer(output);
+	else if (choice == 2)
+		status = ShowInTracker(output);
+	if (status != B_OK)
+		SetStatus("The chopped video was saved, but the selected app could not be opened.");
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+status_t
+KiruWindow::OpenInMediaPlayer(const char* output)
+{
+	entry_ref reference;
+	status_t status = get_ref_for_path(output, &reference);
+	if (status != B_OK)
+		return status;
+	BMessage refs(B_REFS_RECEIVED);
+	status = refs.AddRef("refs", &reference);
+	if (status != B_OK)
+		return status;
+	return be_roster->Launch("application/x-vnd.Haiku-MediaPlayer", &refs);
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+status_t
+KiruWindow::ShowInTracker(const char* output)
+{
+	BEntry file(output, true);
+	status_t status = file.InitCheck();
+	if (status != B_OK)
+		return status;
+	BEntry parent;
+	status = file.GetParent(&parent);
+	if (status != B_OK)
+		return status;
+	entry_ref parentReference;
+	status = parent.GetRef(&parentReference);
+	if (status != B_OK)
+		return status;
+	BMessage refs(B_REFS_RECEIVED);
+	status = refs.AddRef("refs", &parentReference);
+	if (status != B_OK)
+		return status;
+	node_ref fileNode;
+	if (file.GetNodeRef(&fileNode) == B_OK) {
+		refs.AddData("nodeRefToSelect", B_RAW_TYPE, &fileNode,
+			sizeof(fileNode));
+	}
+	BMessenger tracker("application/x-vnd.Be-TRAK");
+	if (tracker.IsValid())
+		return tracker.SendMessage(&refs);
+	return be_roster->Launch("application/x-vnd.Be-TRAK", &refs);
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 

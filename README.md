@@ -21,6 +21,9 @@ selection, then write it as a new file without re-encoding.
 Videos can also be opened with the Open button, by dropping a file on the
 window, or by passing a path on the command line.
 
+After a successful chop, Kiru can open the new clip in MediaPlayer or open its
+containing folder in Tracker.
+
 The Kiru menu includes an About window with version information, project
 dates, design credit, dependency licences, and acknowledgements.
 
@@ -63,5 +66,5 @@ available on other operating systems.
 Kiru was designed by Sikosis. It uses Haiku's Application, Interface, Media,
 and Tracker Kits, distributed under the MIT licence. Fast cutting is performed
 by the separately installed FFmpeg executable, distributed under the LGPL or
-GPL depending on its build configuration. The scissors artwork is from the
-[Icons8 Windows Metro collection](https://icons8.com/icon/713/scissors).
+GPL depending on its build configuration. Kiru's original axe-and-film icon is
+inspired by the dimensional application icons of BeOS and Haiku.

@@ -135,7 +135,9 @@ VideoPlayer::Seek(bigtime_t position, bool precise)
 		return B_NO_INIT;
 	bigtime_t frameDuration = std::max<bigtime_t>(1,
 		static_cast<bigtime_t>(1000000.0f / fFrameRate));
-	bigtime_t latestFramePosition = std::max<bigtime_t>(0, fDuration - frameDuration);
+	bigtime_t endSafetyMargin = std::max<bigtime_t>(frameDuration * 3, 100000);
+	bigtime_t latestFramePosition = std::max<bigtime_t>(0,
+		fDuration - endSafetyMargin);
 	bigtime_t requestedPosition = std::clamp(position, static_cast<bigtime_t>(0),
 		latestFramePosition);
 	bigtime_t seekPosition = requestedPosition;
@@ -165,6 +167,9 @@ VideoPlayer::ReadFrame()
 {
 	if (fVideoTrack == nullptr || fBitmap == nullptr || fFrameBuffer.empty())
 		return B_NO_INIT;
+	int64 totalFrames = fVideoTrack->CountFrames();
+	if (totalFrames > 0 && fVideoTrack->CurrentFrame() >= totalFrames)
+		return B_LAST_BUFFER_ERROR;
 
 	int64 frameCount = 1;
 	media_header header;

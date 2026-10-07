@@ -3,6 +3,7 @@ TYPE := APP
 SRCS := src/KiruApp.cpp src/KiruWindow.cpp src/AboutWindow.cpp src/VideoPlayer.cpp src/VideoView.cpp src/VideoCutter.cpp
 OBJS := $(SRCS:.cpp=.o)
 RDEF := resources/Kiru.rdef
+RESOURCE_ASSETS := resources/Kiru-about.rgba
 RSRC := $(RDEF:.rdef=.rsrc)
 CXXFLAGS := -std=c++17 -Wall -Wextra -Werror -Wno-multichar -Isrc
 LIBS := -lbe -lmedia -ltracker
@@ -19,7 +20,7 @@ $(NAME): $(OBJS) $(RSRC)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-%.rsrc: %.rdef
+%.rsrc: %.rdef $(RESOURCE_ASSETS)
 	rc -o $@ $<
 
 install: $(NAME)

@@ -31,6 +31,9 @@ private:
 	void Chop();
 	void Tick();
 	void ShowAbout();
+	void ShowCutFinished(const char* output);
+	status_t OpenInMediaPlayer(const char* output);
+	status_t ShowInTracker(const char* output);
 	void UpdateInterface();
 	void SetStatus(const char* text);
 	bigtime_t CurrentPosition() const;
