@@ -20,7 +20,7 @@ if [ "$(git -C "$script_directory" rev-parse --is-inside-work-tree 2>/dev/null)"
     exit 1
 fi
 
-gum style --bold --foreground 56 "Updating kizuku's Git repository"
+gum style --bold --foreground 11 "Updating Kiru's Git repository"
 
 # Stage every addition, modification, and deletion in this repository.
 git -C "$script_directory" add -A
