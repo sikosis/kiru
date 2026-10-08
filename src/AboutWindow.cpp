@@ -5,6 +5,7 @@
 #include <Button.h>
 #include <Font.h>
 #include <GroupLayoutBuilder.h>
+#include <InterfaceDefs.h>
 #include <Message.h>
 #include <Mime.h>
 #include <Resources.h>
@@ -90,7 +91,13 @@ LinkView::AttachedToWindow()
 {
 	BStringView::AttachedToWindow();
 	SetViewUIColor(B_PANEL_BACKGROUND_COLOR);
-	SetHighColor(0, 82, 184);
+	rgb_color background = ui_color(B_PANEL_BACKGROUND_COLOR);
+	int32 luminance = (299 * background.red + 587 * background.green
+		+ 114 * background.blue) / 1000;
+	if (luminance < 128)
+		SetHighColor(105, 190, 255);
+	else
+		SetHighColor(0, 76, 168);
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 

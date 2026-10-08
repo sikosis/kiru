@@ -43,12 +43,15 @@ KiruWindow::KiruWindow()
 	fTimeline->SetHashMarks(B_HASH_MARKS_NONE);
 	fTimeLabel = new BStringView("time", "00:00.000 / 00:00.000");
 	fMarksLabel = new BStringView("marks", "IN  --:--.---     OUT  --:--.---");
-	fStatusLabel = new BStringView("status", "Drop a video here, or press Open.");
+	fStatusLabel = new BStringView("status", "Drop a video here, or press L to load one.");
+	BStringView* shortcuts = new BStringView("shortcuts",
+		"Shortcuts: L Load · I/O Mark · Space/P Preview · K Chop · ←/→ 1s · "
+		"Shift+←/→ 5s · ,/. Frame · Home/End");
 	fPlayButton = new BButton("play", "Play / Preview", new BMessage(MSG_TOGGLE_PLAY));
 	fCutButton = new BButton("cut", "Chop  K", new BMessage(MSG_CUT));
 	fCutButton->SetEnabled(false);
 
-	BButton* openButton = new BButton("open", "Open…", new BMessage(MSG_OPEN));
+	BButton* openButton = new BButton("open", "Load  L", new BMessage(MSG_OPEN));
 	BButton* inButton = new BButton("in", "Mark In  I", new BMessage(MSG_MARK_IN));
 	BButton* outButton = new BButton("out", "Mark Out  O", new BMessage(MSG_MARK_OUT));
 	BMenuBar* menuBar = new BMenuBar("menu bar");
@@ -78,7 +81,8 @@ KiruWindow::KiruWindow()
 			.Add(outButton)
 			.Add(fCutButton)
 		.End()
-		.Add(fStatusLabel));
+		.Add(fStatusLabel)
+		.Add(shortcuts));
 
 	fOpenPanel = std::make_unique<BFilePanel>(B_OPEN_PANEL, new BMessenger(this),
 		nullptr, B_FILE_NODE, false);
@@ -130,7 +134,7 @@ KiruWindow::DispatchMessage(BMessage* message, BHandler* handler)
 						break;
 					case 'l':
 					case 'L':
-						action = MSG_FORWARD_FIVE;
+						action = MSG_OPEN;
 						break;
 					case ',':
 						action = MSG_BACK_FRAME;
@@ -139,10 +143,12 @@ KiruWindow::DispatchMessage(BMessage* message, BHandler* handler)
 						action = MSG_FORWARD_FRAME;
 						break;
 					case B_LEFT_ARROW:
-						action = MSG_BACK_ONE;
+						action = (keyModifiers & B_SHIFT_KEY) != 0
+							? MSG_BACK_FIVE : MSG_BACK_ONE;
 						break;
 					case B_RIGHT_ARROW:
-						action = MSG_FORWARD_ONE;
+						action = (keyModifiers & B_SHIFT_KEY) != 0
+							? MSG_FORWARD_FIVE : MSG_FORWARD_ONE;
 						break;
 					case B_HOME:
 						action = MSG_TO_START;
@@ -301,7 +307,7 @@ KiruWindow::OpenFile(const char* path)
 	BString title("Kiru — ");
 	title << videoPath.Leaf();
 	SetTitle(title.String());
-	SetStatus("Scrub ←/→ 1s, J/L 5s, ,/. one frame — mark with I/O, chop with K.");
+	SetStatus("Video loaded. Set in and out points, then preview or chop.");
 	UpdateInterface();
 }
 //---------------------------------------------------------------------------------------------------------------------------------//

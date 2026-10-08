@@ -1,10 +1,14 @@
 #!/bin/sh
 set -eu
 
-required="README.md Makefile resources/Kiru.png resources/Kiru-about.rgba resources/Kiru.rdef resources/Kiru.svg src/KiruApp.cpp src/KiruWindow.cpp src/AboutWindow.cpp src/VideoPlayer.cpp src/VideoCutter.cpp"
+required="README.md Makefile resources/Kiru.png resources/Kiru-about.rgba resources/Kiru-32.icon resources/Kiru-16.icon resources/Kiru.rdef src/KiruApp.cpp src/KiruWindow.cpp src/AboutWindow.cpp src/VideoPlayer.cpp src/VideoCutter.cpp"
 for file in $required; do
 	test -s "$file"
 done
+
+test "$(wc -c < resources/Kiru-about.rgba)" -eq 16384
+test "$(wc -c < resources/Kiru-32.icon)" -eq 1024
+test "$(wc -c < resources/Kiru-16.icon)" -eq 256
 
 for key in MSG_MARK_IN MSG_MARK_OUT MSG_TOGGLE_PLAY MSG_CUT; do
 	rg -q "$key" src
@@ -16,6 +20,11 @@ rg -Fq 'fVideoTrack->CurrentFrame() >= totalFrames' src/VideoPlayer.cpp
 rg -Fq 'KiruWindow::DispatchMessage(BMessage* message, BHandler* handler)' src/KiruWindow.cpp
 rg -Fq "case 'i':" src/KiruWindow.cpp
 rg -Fq "case 'o':" src/KiruWindow.cpp
+rg -Fq "case 'l':" src/KiruWindow.cpp
+rg -Fq 'action = MSG_OPEN;' src/KiruWindow.cpp
+rg -Fq '(keyModifiers & B_SHIFT_KEY) != 0' src/KiruWindow.cpp
+rg -Fq '"open", "Load  L"' src/KiruWindow.cpp
+rg -Fq '"Shortcuts: L Load' src/KiruWindow.cpp
 rg -Fq 'Open in MediaPlayer' src/KiruWindow.cpp
 rg -Fq 'Show in Tracker' src/KiruWindow.cpp
 rg -Fq 'application/x-vnd.Haiku-MediaPlayer' src/KiruWindow.cpp
@@ -26,12 +35,16 @@ rg -q 'BEOS:L:STD_ICON' resources/Kiru.rdef
 rg -q 'BEOS:M:STD_ICON' resources/Kiru.rdef
 rg -q 'KIRU:ABOUT_ICON' resources/Kiru.rdef
 rg -Fq 'import "Kiru-about.rgba"' resources/Kiru.rdef
+rg -Fq 'import "Kiru-32.icon"' resources/Kiru.rdef
+rg -Fq 'import "Kiru-16.icon"' resources/Kiru.rdef
 rg -q 'B_NOT_RESIZABLE' src/AboutWindow.cpp
 if rg -q 'resource vector_icon|BIconUtils::GetVectorIcon' resources/Kiru.rdef src/AboutWindow.cpp; then
 	echo "Invalid HVIF runtime path found" >&2
 	exit 1
 fi
 rg -Fq "LoadResource('KICO', 102" src/AboutWindow.cpp
+rg -Fq 'ui_color(B_PANEL_BACKGROUND_COLOR)' src/AboutWindow.cpp
+rg -Fq 'luminance < 128' src/AboutWindow.cpp
 rg -Fq 'B_LARGE_ICON_TYPE, 101' src/AboutWindow.cpp
 rg -Fq 'B_TRANSPARENT_MAGIC_CMAP8' src/AboutWindow.cpp
 rg -q 'Designed by Sikosis' src/AboutWindow.cpp

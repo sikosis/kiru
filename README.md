@@ -9,16 +9,18 @@ selection, then write it as a new file without re-encoding.
 | Key | Action |
 | --- | --- |
 | Timeline | Drag for a responsive preview position; release to decode that frame |
+| `L` | Load a video using the file panel |
 | `I` | Set the in point |
 | `O` | Set the out point |
 | `Space` or `P` | Play/pause; with both marks set, preview only the selection |
 | `K` | Chop the marked selection into a new video |
 | `Left` / `Right` | Seek backward/forward one second |
-| `J` / `L` | Seek backward/forward five seconds |
+| `Shift+Left` / `Shift+Right` | Seek backward/forward five seconds |
+| `J` | Seek backward five seconds |
 | `,` / `.` | Step backward/forward one video frame |
 | `Home` / `End` | Seek to the beginning/end |
 
-Videos can also be opened with the Open button, by dropping a file on the
+Videos can also be opened with the Load button, by dropping a file on the
 window, or by passing a path on the command line.
 
 After a successful chop, Kiru can open the new clip in MediaPlayer or open its
