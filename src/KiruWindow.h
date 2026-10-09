@@ -34,6 +34,7 @@ private:
 	void ShowCutFinished(const char* output);
 	bool VLCIsInstalled() const;
 	status_t OpenInPlayer(const char* output);
+	status_t OpenInVLC(const char* output);
 	status_t OpenWithApplication(const char* output, const char* signature);
 	status_t ShowInTracker(const char* output);
 	void UpdateInterface();

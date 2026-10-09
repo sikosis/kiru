@@ -36,7 +36,7 @@ window, or by passing a path on the command line.
 
 After a successful chop, Kiru can open the new clip in MediaPlayer or open its
 containing folder in Tracker. If VLC is installed, Kiru detects its Haiku
-application signature and also offers it in the player chooser.
+application signature or executable and also offers it in the player chooser.
 
 Design credits, dependency licences, acknowledgements and project dates can be
 found in the About dialog.

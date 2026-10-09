@@ -27,8 +27,12 @@ rg -Fq '"open", "Load  L"' src/KiruWindow.cpp
 rg -Fq '"Shortcuts: L Load' src/KiruWindow.cpp
 rg -Fq 'Open in MediaPlayer' src/KiruWindow.cpp
 rg -Fq 'Open in Player' src/KiruWindow.cpp
+rg -Fq 'application/x-vnd.vlc' src/KiruWindow.cpp
 rg -Fq 'application/x-vnd.videolan-vlc' src/KiruWindow.cpp
 rg -Fq 'VLCIsInstalled()' src/KiruWindow.cpp
+rg -Fq 'FindExecutable("vlc", reference)' src/KiruWindow.cpp
+rg -Fq '/boot/system/bin/vlc' src/KiruWindow.cpp
+rg -Fq 'OpenInVLC(output)' src/KiruWindow.cpp
 rg -Fq 'Show in Tracker' src/KiruWindow.cpp
 rg -Fq 'application/x-vnd.Haiku-MediaPlayer' src/KiruWindow.cpp
 rg -Fq 'application/x-vnd.Be-TRAK' src/KiruWindow.cpp
@@ -37,6 +41,7 @@ rg -Fq 'application/x-vnd.Haiku-Terminal' src/KiruApp.cpp
 rg -Fq 'pkgman install ffmpeg' src/KiruApp.cpp
 rg -q 'execlp\("ffmpeg"' src/VideoCutter.cpp
 rg -q 'resource app_signature "application/x-vnd.sikosis-kiru"' resources/Kiru.rdef
+rg -Fq 'middle = 1,' resources/Kiru.rdef
 rg -Fq 'minor = 9,' resources/Kiru.rdef
 rg -Fq 'long_info = "Kiru v0.19' resources/Kiru.rdef
 rg -Fq '"Version v0.19"' src/AboutWindow.cpp

@@ -21,11 +21,75 @@
 #include <StringView.h>
 
 #include <algorithm>
+#include <cstdlib>
 #include <cstdio>
+#include <string>
+#include <unistd.h>
 
 static const int32 kTimelineResolution = 1000000;
 static const char* kMediaPlayerSignature = "application/x-vnd.Haiku-MediaPlayer";
-static const char* kVLCSignature = "application/x-vnd.videolan-vlc";
+static const char* kVLCSignature = "application/x-vnd.vlc";
+static const char* kLegacyVLCSignature = "application/x-vnd.videolan-vlc";
+
+static bool ExecutableReference(const char* path, entry_ref& reference) {
+	if (path == nullptr || access(path, X_OK) != 0)
+		return false;
+	BEntry entry(path, true);
+	return entry.InitCheck() == B_OK && entry.IsFile()
+		&& entry.GetRef(&reference) == B_OK;
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+static bool FindExecutable(const char* name, entry_ref& reference) {
+	const char* path = std::getenv("PATH");
+	if (path == nullptr)
+		return false;
+
+	std::string searchPath(path);
+	size_t start = 0;
+	while (start <= searchPath.size()) {
+		size_t end = searchPath.find(':', start);
+		std::string directory = searchPath.substr(start, end - start);
+		std::string candidate = directory.empty()
+			? name : directory + "/" + name;
+		if (ExecutableReference(candidate.c_str(), reference))
+			return true;
+		if (end == std::string::npos)
+			break;
+		start = end + 1;
+	}
+	return false;
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+static bool FindVLC(entry_ref& reference) {
+	if (be_roster->FindApp(kVLCSignature, &reference) == B_OK)
+		return true;
+	if (be_roster->FindApp(kLegacyVLCSignature, &reference) == B_OK)
+		return true;
+	if (FindExecutable("vlc", reference) || FindExecutable("VLC", reference))
+		return true;
+
+	static const char* const paths[] = {
+		"/boot/system/bin/vlc",
+		"/boot/home/config/bin/vlc",
+		"/boot/home/config/non-packaged/bin/vlc",
+		"/boot/system/apps/VLC media player",
+		"/boot/home/config/apps/VLC media player",
+		"/boot/home/config/non-packaged/apps/VLC media player",
+		"/boot/system/apps/VLC/VLC",
+		"/boot/home/config/apps/VLC/VLC",
+		"/boot/home/config/non-packaged/apps/VLC/VLC"
+	};
+	for (const char* path : paths) {
+		if (ExecutableReference(path, reference))
+			return true;
+	}
+	return false;
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
 
 KiruWindow::KiruWindow()
 	:
@@ -451,13 +515,12 @@ void KiruWindow::ShowCutFinished(const char* output) {
 
 bool KiruWindow::VLCIsInstalled() const {
 	entry_ref reference;
-	return be_roster->FindApp(kVLCSignature, &reference) == B_OK;
+	return FindVLC(reference);
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
 status_t KiruWindow::OpenInPlayer(const char* output) {
-	const char* signature = kMediaPlayerSignature;
 	if (VLCIsInstalled()) {
 		BAlert* alert = new BAlert("Open chopped video",
 			"Which player would you like to use?", "Cancel", "MediaPlayer",
@@ -468,9 +531,26 @@ status_t KiruWindow::OpenInPlayer(const char* output) {
 		if (choice == 0)
 			return B_OK;
 		if (choice == 2)
-			signature = kVLCSignature;
+			return OpenInVLC(output);
 	}
-	return OpenWithApplication(output, signature);
+	return OpenWithApplication(output, kMediaPlayerSignature);
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+status_t KiruWindow::OpenInVLC(const char* output) {
+	entry_ref applicationReference;
+	if (!FindVLC(applicationReference))
+		return B_ENTRY_NOT_FOUND;
+	entry_ref videoReference;
+	status_t status = get_ref_for_path(output, &videoReference);
+	if (status != B_OK)
+		return status;
+	BMessage refs(B_REFS_RECEIVED);
+	status = refs.AddRef("refs", &videoReference);
+	if (status != B_OK)
+		return status;
+	return be_roster->Launch(&applicationReference, &refs);
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
