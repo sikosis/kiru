@@ -114,7 +114,7 @@ LinkView::MouseDown(BPoint point)
 
 AboutWindow::AboutWindow()
 	:
-	BWindow(BRect(0, 0, 560, 570), "About Kiru", B_TITLED_WINDOW,
+	BWindow(BRect(0, 0, 560, 620), "About Kiru", B_TITLED_WINDOW,
 		B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_AUTO_UPDATE_SIZE_LIMITS
 			| B_CLOSE_ON_ESCAPE)
 {
@@ -165,7 +165,7 @@ AboutWindow::AboutWindow()
 	BFont titleFont(*be_bold_font);
 	titleFont.SetSize(be_plain_font->Size() * 2.0f);
 	title->SetFont(&titleFont);
-	BStringView* version = new BStringView("version", "Version v0.17");
+	BStringView* version = new BStringView("version", "Version v0.19");
 	BStringView* description = new BStringView("description",
 		"A quick, keyboard-first video chopping tool for Haiku.");
 
@@ -207,12 +207,16 @@ AboutWindow::AboutWindow()
 		.Add(new BStringView("ffmpeg licence",
 			"FFmpeg — external dependency; LGPL/GPL depending on build"))
 		.Add(new LinkView("ffmpeg link", "https://ffmpeg.org/", "https://ffmpeg.org/"))
+		.Add(new BStringView("vlc licence",
+			"VLC media player — optional external player; GPL licence"))
+		.Add(new LinkView("vlc link", "https://www.videolan.org/vlc/",
+			"https://www.videolan.org/vlc/"))
 		.Add(new BStringView("icon credit",
 			"Original BeOS-inspired axe-and-film icon"))
 		.AddStrut(5.0f)
 		.Add(thanksHeading)
 		.Add(new BStringView("thanks",
-			"The Haiku and FFmpeg communities."))
+			"The Haiku, FFmpeg and VideoLAN communities."))
 		.AddGroup(B_HORIZONTAL, 0)
 			.AddGlue()
 			.Add(closeButton)

@@ -26,15 +26,21 @@ rg -Fq '(keyModifiers & B_SHIFT_KEY) != 0' src/KiruWindow.cpp
 rg -Fq '"open", "Load  L"' src/KiruWindow.cpp
 rg -Fq '"Shortcuts: L Load' src/KiruWindow.cpp
 rg -Fq 'Open in MediaPlayer' src/KiruWindow.cpp
+rg -Fq 'Open in Player' src/KiruWindow.cpp
+rg -Fq 'application/x-vnd.videolan-vlc' src/KiruWindow.cpp
+rg -Fq 'VLCIsInstalled()' src/KiruWindow.cpp
 rg -Fq 'Show in Tracker' src/KiruWindow.cpp
 rg -Fq 'application/x-vnd.Haiku-MediaPlayer' src/KiruWindow.cpp
 rg -Fq 'application/x-vnd.Be-TRAK' src/KiruWindow.cpp
+rg -Fq 'FFmpegIsInstalled()' src/KiruApp.cpp
+rg -Fq 'application/x-vnd.Haiku-Terminal' src/KiruApp.cpp
+rg -Fq 'pkgman install ffmpeg' src/KiruApp.cpp
 rg -q 'execlp\("ffmpeg"' src/VideoCutter.cpp
 rg -q 'resource app_signature "application/x-vnd.sikosis-kiru"' resources/Kiru.rdef
-rg -Fq 'minor = 7,' resources/Kiru.rdef
-rg -Fq 'long_info = "Kiru v0.17' resources/Kiru.rdef
-rg -Fq '"Version v0.17"' src/AboutWindow.cpp
-rg -Fq 'img.shields.io/badge/version-v0.17' README.md
+rg -Fq 'minor = 9,' resources/Kiru.rdef
+rg -Fq 'long_info = "Kiru v0.19' resources/Kiru.rdef
+rg -Fq '"Version v0.19"' src/AboutWindow.cpp
+rg -Fq 'img.shields.io/badge/version-v0.19' README.md
 rg -Fq 'Updated: 10 October 2026' src/AboutWindow.cpp
 rg -q 'BEOS:L:STD_ICON' resources/Kiru.rdef
 rg -q 'BEOS:M:STD_ICON' resources/Kiru.rdef

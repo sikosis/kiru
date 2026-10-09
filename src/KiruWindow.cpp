@@ -24,6 +24,8 @@
 #include <cstdio>
 
 static const int32 kTimelineResolution = 1000000;
+static const char* kMediaPlayerSignature = "application/x-vnd.Haiku-MediaPlayer";
+static const char* kVLCSignature = "application/x-vnd.videolan-vlc";
 
 KiruWindow::KiruWindow()
 	:
@@ -425,20 +427,20 @@ KiruWindow::ShowAbout()
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::ShowCutFinished(const char* output)
-{
+void KiruWindow::ShowCutFinished(const char* output) {
 	BPath outputPath(output);
 	BString text("Saved ");
 	text << outputPath.Leaf() << ".\n\nWhat would you like to do?";
+	const char* playerButton = VLCIsInstalled()
+		? "Open in Player" B_UTF8_ELLIPSIS : "Open in MediaPlayer";
 	BAlert* alert = new BAlert("Chop finished", text.String(), "Done",
-		"Open in MediaPlayer", "Show in Tracker", B_WIDTH_AS_USUAL, B_INFO_ALERT);
+		playerButton, "Show in Tracker", B_WIDTH_AS_USUAL, B_INFO_ALERT);
 	alert->SetShortcut(0, B_ESCAPE);
 	alert->SetShortcut(1, B_ENTER);
 	int32 choice = alert->Go();
 	status_t status = B_OK;
 	if (choice == 1)
-		status = OpenInMediaPlayer(output);
+		status = OpenInPlayer(output);
 	else if (choice == 2)
 		status = ShowInTracker(output);
 	if (status != B_OK)
@@ -447,9 +449,34 @@ KiruWindow::ShowCutFinished(const char* output)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-status_t
-KiruWindow::OpenInMediaPlayer(const char* output)
-{
+bool KiruWindow::VLCIsInstalled() const {
+	entry_ref reference;
+	return be_roster->FindApp(kVLCSignature, &reference) == B_OK;
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+status_t KiruWindow::OpenInPlayer(const char* output) {
+	const char* signature = kMediaPlayerSignature;
+	if (VLCIsInstalled()) {
+		BAlert* alert = new BAlert("Open chopped video",
+			"Which player would you like to use?", "Cancel", "MediaPlayer",
+			"VLC", B_WIDTH_AS_USUAL, B_INFO_ALERT);
+		alert->SetShortcut(0, B_ESCAPE);
+		alert->SetShortcut(1, B_ENTER);
+		int32 choice = alert->Go();
+		if (choice == 0)
+			return B_OK;
+		if (choice == 2)
+			signature = kVLCSignature;
+	}
+	return OpenWithApplication(output, signature);
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+status_t KiruWindow::OpenWithApplication(const char* output,
+	const char* signature) {
 	entry_ref reference;
 	status_t status = get_ref_for_path(output, &reference);
 	if (status != B_OK)
@@ -458,7 +485,7 @@ KiruWindow::OpenInMediaPlayer(const char* output)
 	status = refs.AddRef("refs", &reference);
 	if (status != B_OK)
 		return status;
-	return be_roster->Launch("application/x-vnd.Haiku-MediaPlayer", &refs);
+	return be_roster->Launch(signature, &refs);
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 

@@ -32,7 +32,9 @@ private:
 	void Tick();
 	void ShowAbout();
 	void ShowCutFinished(const char* output);
-	status_t OpenInMediaPlayer(const char* output);
+	bool VLCIsInstalled() const;
+	status_t OpenInPlayer(const char* output);
+	status_t OpenWithApplication(const char* output, const char* signature);
 	status_t ShowInTracker(const char* output);
 	void UpdateInterface();
 	void SetStatus(const char* text);
