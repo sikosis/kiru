@@ -165,7 +165,7 @@ AboutWindow::AboutWindow()
 	BFont titleFont(*be_bold_font);
 	titleFont.SetSize(be_plain_font->Size() * 2.0f);
 	title->SetFont(&titleFont);
-	BStringView* version = new BStringView("version", "Version 0.1.0");
+	BStringView* version = new BStringView("version", "Version v0.17");
 	BStringView* description = new BStringView("description",
 		"A quick, keyboard-first video chopping tool for Haiku.");
 
@@ -197,7 +197,7 @@ AboutWindow::AboutWindow()
 		.Add(projectHeading)
 		.Add(new BStringView("designer", "Designed by Sikosis"))
 		.Add(new BStringView("created", "Creation Date: 4 October 2026"))
-		.Add(new BStringView("updated", "Updated: 8 October 2026"))
+		.Add(new BStringView("updated", "Updated: 10 October 2026"))
 		.AddStrut(5.0f)
 		.Add(licenceHeading)
 		.Add(new BStringView("haiku licence",
