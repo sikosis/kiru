@@ -12,6 +12,7 @@ class BFilePanel;
 class BMessageRunner;
 class BSlider;
 class BStringView;
+class OutputLinkView;
 class VideoView;
 
 class KiruWindow : public BWindow {
@@ -30,6 +31,7 @@ private:
 	void SetMark(bool isInMark);
 	void Chop();
 	void Tick();
+	void ScheduleTick();
 	void ShowAbout();
 	void ShowCutFinished(const char* output);
 	bool VLCIsInstalled() const;
@@ -48,6 +50,7 @@ private:
 	BStringView* fTimeLabel;
 	BStringView* fMarksLabel;
 	BStringView* fStatusLabel;
+	OutputLinkView* fOutputLink;
 	BButton* fPlayButton;
 	BButton* fCutButton;
 	std::unique_ptr<BFilePanel> fOpenPanel;
@@ -55,6 +58,7 @@ private:
 	bigtime_t fInPoint;
 	bigtime_t fOutPoint;
 	bigtime_t fScrubPosition;
+	bigtime_t fTickInterval;
 	bool fPlaying;
 	bool fCutting;
 	bool fScrubbing;

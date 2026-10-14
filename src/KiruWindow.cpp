@@ -10,7 +10,9 @@
 #include <Button.h>
 #include <Entry.h>
 #include <FilePanel.h>
+#include <Font.h>
 #include <GroupLayoutBuilder.h>
+#include <InterfaceDefs.h>
 #include <Menu.h>
 #include <MenuBar.h>
 #include <MenuItem.h>
@@ -30,6 +32,67 @@ static const int32 kTimelineResolution = 1000000;
 static const char* kMediaPlayerSignature = "application/x-vnd.Haiku-MediaPlayer";
 static const char* kVLCSignature = "application/x-vnd.vlc";
 static const char* kLegacyVLCSignature = "application/x-vnd.videolan-vlc";
+
+class OutputLinkView : public BStringView {
+public:
+	OutputLinkView();
+
+	void AttachedToWindow() override;
+	void MouseDown(BPoint point) override;
+	void SetOutput(const char* output);
+
+private:
+	BString fOutput;
+};
+
+OutputLinkView::OutputLinkView()
+	:
+	BStringView("output link", "")
+{
+	BFont font;
+	GetFont(&font);
+	font.SetFace(font.Face() | B_UNDERSCORE_FACE);
+	SetFont(&font);
+	Hide();
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+void OutputLinkView::AttachedToWindow() {
+	BStringView::AttachedToWindow();
+	SetViewUIColor(B_PANEL_BACKGROUND_COLOR);
+	rgb_color background = ui_color(B_PANEL_BACKGROUND_COLOR);
+	int32 luminance = (299 * background.red + 587 * background.green
+		+ 114 * background.blue) / 1000;
+	if (luminance < 128)
+		SetHighColor(105, 190, 255);
+	else
+		SetHighColor(0, 76, 168);
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+void OutputLinkView::MouseDown(BPoint point) {
+	(void)point;
+	if (fOutput.IsEmpty() || Window() == nullptr)
+		return;
+	BMessage message(MSG_SHOW_CUT_FINISHED);
+	message.AddString("output", fOutput.String());
+	Window()->PostMessage(&message);
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+void OutputLinkView::SetOutput(const char* output) {
+	fOutput = output;
+	BPath path(output);
+	BString label("Saved: ");
+	label << path.Leaf() << " — click for options";
+	SetText(label.String());
+	SetToolTip(output);
+	Show();
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
 
 static bool ExecutableReference(const char* path, entry_ref& reference) {
 	if (path == nullptr || access(path, X_OK) != 0)
@@ -98,6 +161,7 @@ KiruWindow::KiruWindow()
 	fInPoint(-1),
 	fOutPoint(-1),
 	fScrubPosition(0),
+	fTickInterval(40000),
 	fPlaying(false),
 	fCutting(false),
 	fScrubbing(false)
@@ -110,6 +174,7 @@ KiruWindow::KiruWindow()
 	fTimeLabel = new BStringView("time", "00:00.000 / 00:00.000");
 	fMarksLabel = new BStringView("marks", "IN  --:--.---     OUT  --:--.---");
 	fStatusLabel = new BStringView("status", "Drop a video here, or press L to load one.");
+	fOutputLink = new OutputLinkView();
 	BStringView* shortcuts = new BStringView("shortcuts",
 		"Shortcuts: L Load · I/O Mark · Space/P Preview · K Chop · ←/→ 1s · "
 		"Shift+←/→ 5s · ,/. Frame · Home/End");
@@ -148,12 +213,11 @@ KiruWindow::KiruWindow()
 			.Add(fCutButton)
 		.End()
 		.Add(fStatusLabel)
+		.Add(fOutputLink)
 		.Add(shortcuts));
 
 	fOpenPanel = std::make_unique<BFilePanel>(B_OPEN_PANEL, new BMessenger(this),
 		nullptr, B_FILE_NODE, false);
-	fTicker = std::make_unique<BMessageRunner>(BMessenger(this), new BMessage(MSG_TICK),
-		40000);
 	fTimeline->SetEnabled(false);
 	SetSizeLimits(560, 4000, 380, 4000);
 }
@@ -315,6 +379,12 @@ KiruWindow::MessageReceived(BMessage* message)
 		case MSG_CUT:
 			Chop();
 			break;
+		case MSG_SHOW_CUT_FINISHED: {
+			const char* output = message->GetString("output", "");
+			if (output[0] != '\0')
+				ShowCutFinished(output);
+			break;
+		}
 		case B_ABOUT_REQUESTED:
 			ShowAbout();
 			break;
@@ -326,9 +396,8 @@ KiruWindow::MessageReceived(BMessage* message)
 			int32 status = message->GetInt32("status", -1);
 			const char* output = message->GetString("output", "");
 			if (status == 0) {
-				BString text("Saved ");
-				text << output;
-				SetStatus(text.String());
+				SetStatus("Chop finished.");
+				fOutputLink->SetOutput(output);
 				UpdateInterface();
 				ShowCutFinished(output);
 			} else if (status == 127) {
@@ -363,11 +432,9 @@ KiruWindow::OpenFile(const char* path)
 		return;
 	}
 	fVideoView->SetBitmap(fPlayer.Bitmap());
-	bigtime_t tickInterval = static_cast<bigtime_t>(1000000.0f / fPlayer.FrameRate());
-	tickInterval = std::clamp(tickInterval, static_cast<bigtime_t>(10000),
+	fTickInterval = static_cast<bigtime_t>(1000000.0f / fPlayer.FrameRate());
+	fTickInterval = std::clamp(fTickInterval, static_cast<bigtime_t>(10000),
 		static_cast<bigtime_t>(100000));
-	fTicker = std::make_unique<BMessageRunner>(BMessenger(this), new BMessage(MSG_TICK),
-		tickInterval);
 	fTimeline->SetEnabled(true);
 	BPath videoPath(path);
 	BString title("Kiru — ");
@@ -387,6 +454,8 @@ KiruWindow::Seek(bigtime_t position, bool precise)
 	fScrubbing = false;
 	if (!precise)
 		fPlaying = false;
+	if (!precise)
+		fTicker.reset();
 	status_t status = fPlayer.Seek(position, precise);
 	if (status != B_OK) {
 		SetStatus("Could not seek to that position.");
@@ -408,10 +477,14 @@ KiruWindow::TogglePlayback()
 		if (fInPoint >= 0 && fOutPoint > fInPoint
 			&& (start < fInPoint || start >= fOutPoint)) {
 			start = fInPoint;
+			Seek(start);
 		}
-		Seek(start, true);
 	}
 	fPlaying = !fPlaying;
+	if (fPlaying)
+		ScheduleTick();
+	else
+		fTicker.reset();
 	SetStatus(fPlaying ? "Previewing…" : "Paused.");
 	UpdateInterface();
 }
@@ -442,6 +515,7 @@ KiruWindow::Chop()
 	if (!fPlayer.IsOpen() || fInPoint < 0 || fOutPoint <= fInPoint || fCutting)
 		return;
 	fPlaying = false;
+	fTicker.reset();
 	BString output;
 	BString error;
 	status_t status = VideoCutter::Start(fPlayer.Path(), fInPoint, fOutPoint,
@@ -462,6 +536,7 @@ KiruWindow::Chop()
 void
 KiruWindow::Tick()
 {
+	fTicker.reset();
 	if (!fPlaying || !fPlayer.IsOpen())
 		return;
 	bool hasSelection = fOutPoint > fInPoint && fInPoint >= 0;
@@ -473,11 +548,19 @@ KiruWindow::Tick()
 	bigtime_t finalFramePosition = std::max<bigtime_t>(0, end - endSafetyMargin);
 	if (fPlayer.Position() >= finalFramePosition || fPlayer.ReadFrame() != B_OK) {
 		fPlaying = false;
-		Seek(fInPoint >= 0 && fOutPoint > fInPoint ? fInPoint : 0);
 		SetStatus("Preview finished.");
 	}
 	fVideoView->Invalidate();
 	UpdateInterface();
+	if (fPlaying)
+		ScheduleTick();
+}
+//---------------------------------------------------------------------------------------------------------------------------------//
+
+
+void KiruWindow::ScheduleTick() {
+	fTicker = std::make_unique<BMessageRunner>(BMessenger(this),
+		new BMessage(MSG_TICK), fTickInterval, 1);
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
@@ -542,15 +625,8 @@ status_t KiruWindow::OpenInVLC(const char* output) {
 	entry_ref applicationReference;
 	if (!FindVLC(applicationReference))
 		return B_ENTRY_NOT_FOUND;
-	entry_ref videoReference;
-	status_t status = get_ref_for_path(output, &videoReference);
-	if (status != B_OK)
-		return status;
-	BMessage refs(B_REFS_RECEIVED);
-	status = refs.AddRef("refs", &videoReference);
-	if (status != B_OK)
-		return status;
-	return be_roster->Launch(&applicationReference, &refs);
+	const char* arguments[] = {output};
+	return be_roster->Launch(&applicationReference, 1, arguments);
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 

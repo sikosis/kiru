@@ -15,6 +15,7 @@ for key in MSG_MARK_IN MSG_MARK_OUT MSG_TOGGLE_PLAY MSG_CUT; do
 done
 
 rg -Fq 'SetModificationMessage(new BMessage(MSG_SCRUB))' src/KiruWindow.cpp
+rg -Fq 'new BMessage(MSG_TICK), fTickInterval, 1' src/KiruWindow.cpp
 rg -Fq 'fPlayer.Seek(position, precise)' src/KiruWindow.cpp
 rg -Fq 'fVideoTrack->CurrentFrame() >= totalFrames' src/VideoPlayer.cpp
 rg -Fq 'KiruWindow::DispatchMessage(BMessage* message, BHandler* handler)' src/KiruWindow.cpp
@@ -33,6 +34,9 @@ rg -Fq 'VLCIsInstalled()' src/KiruWindow.cpp
 rg -Fq 'FindExecutable("vlc", reference)' src/KiruWindow.cpp
 rg -Fq '/boot/system/bin/vlc' src/KiruWindow.cpp
 rg -Fq 'OpenInVLC(output)' src/KiruWindow.cpp
+rg -Fq 'be_roster->Launch(&applicationReference, 1, arguments)' src/KiruWindow.cpp
+rg -Fq 'MSG_SHOW_CUT_FINISHED' src/KiruWindow.cpp
+rg -Fq 'click for options' src/KiruWindow.cpp
 rg -Fq 'Show in Tracker' src/KiruWindow.cpp
 rg -Fq 'application/x-vnd.Haiku-MediaPlayer' src/KiruWindow.cpp
 rg -Fq 'application/x-vnd.Be-TRAK' src/KiruWindow.cpp
@@ -46,7 +50,7 @@ rg -Fq 'minor = 9,' resources/Kiru.rdef
 rg -Fq 'long_info = "Kiru v0.19' resources/Kiru.rdef
 rg -Fq '"Version v0.19"' src/AboutWindow.cpp
 rg -Fq 'img.shields.io/badge/version-v0.19' README.md
-rg -Fq 'Updated: 10 October 2026' src/AboutWindow.cpp
+rg -Fq 'Updated: 14 October 2026' src/AboutWindow.cpp
 rg -q 'BEOS:L:STD_ICON' resources/Kiru.rdef
 rg -q 'BEOS:M:STD_ICON' resources/Kiru.rdef
 rg -q 'KIRU:ABOUT_ICON' resources/Kiru.rdef
@@ -68,6 +72,11 @@ rg -q 'Creation Date: 4 October 2026' src/AboutWindow.cpp
 
 if rg -n '^\s*// TODO|^\s*// FIXME' src; then
 	echo "Unresolved TODO or FIXME found" >&2
+	exit 1
+fi
+
+if rg -Fq 'Seek(start, true)' src/KiruWindow.cpp; then
+	echo "Preview still performs a blocking precise reseek" >&2
 	exit 1
 fi
 

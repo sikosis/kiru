@@ -20,7 +20,8 @@ enum {
 	MSG_MARK_IN = 'mrki',
 	MSG_MARK_OUT = 'mrko',
 	MSG_CUT = 'chop',
-	MSG_CUT_FINISHED = 'done'
+	MSG_CUT_FINISHED = 'done',
+	MSG_SHOW_CUT_FINISHED = 'show'
 };
 
 #endif
