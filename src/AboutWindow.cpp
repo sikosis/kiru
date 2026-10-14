@@ -154,10 +154,8 @@ AboutWindow::AboutWindow() : BWindow(BRect(0, 0, 560, 620), "About Kiru", B_TITL
 	BStringView* projectHeading = new BStringView("project heading", "Project");
 	projectHeading->SetFont(be_bold_font);
 	BStringView* licenceHeading = new BStringView("licence heading",
-		"Licences and dependencies");
+		"Licences / Special Thanks");
 	licenceHeading->SetFont(be_bold_font);
-	BStringView* thanksHeading = new BStringView("thanks heading", "Special thanks");
-	thanksHeading->SetFont(be_bold_font);
 
 	BButton* closeButton = new BButton("close", "Close", new BMessage(B_QUIT_REQUESTED));
 	closeButton->MakeDefault(true);
@@ -182,10 +180,6 @@ AboutWindow::AboutWindow() : BWindow(BRect(0, 0, 560, 620), "About Kiru", B_TITL
 		.Add(new BStringView("updated", "Updated: 14th October 2026"))
 		.AddStrut(5.0f)
 		.Add(licenceHeading)
-		.Add(new BStringView("haiku licence",
-			"Haiku Application, Interface, Media and Tracker Kits — MIT licence"))
-		.Add(new LinkView("haiku link", "https://www.haiku-os.org/",
-			"https://www.haiku-os.org/"))
 		.Add(new BStringView("ffmpeg licence",
 			"FFmpeg — external dependency; LGPL/GPL depending on build"))
 		.Add(new LinkView("ffmpeg link", "https://ffmpeg.org/", "https://ffmpeg.org/"))
@@ -193,12 +187,6 @@ AboutWindow::AboutWindow() : BWindow(BRect(0, 0, 560, 620), "About Kiru", B_TITL
 			"VLC media player — optional external player; GPL licence"))
 		.Add(new LinkView("vlc link", "https://www.videolan.org/vlc/",
 			"https://www.videolan.org/vlc/"))
-		.Add(new BStringView("icon credit",
-			"Original BeOS-inspired axe-and-film icon"))
-		.AddStrut(5.0f)
-		.Add(thanksHeading)
-		.Add(new BStringView("thanks",
-			"FFmpeg and VideoLAN communities."))
 		.AddGroup(B_HORIZONTAL, 0)
 			.AddGlue()
 			.Add(closeButton)
