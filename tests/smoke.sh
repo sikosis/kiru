@@ -57,6 +57,7 @@ rg -q 'KIRU:ABOUT_ICON' resources/Kiru.rdef
 rg -Fq 'import "Kiru-about.rgba"' resources/Kiru.rdef
 rg -Fq 'import "Kiru-32.icon"' resources/Kiru.rdef
 rg -Fq 'import "Kiru-16.icon"' resources/Kiru.rdef
+rg -Fq 'mimeset -f /boot/home/config/non-packaged/apps/$(NAME)' Makefile
 rg -q 'B_NOT_RESIZABLE' src/AboutWindow.cpp
 if rg -q 'resource vector_icon|BIconUtils::GetVectorIcon' resources/Kiru.rdef src/AboutWindow.cpp; then
 	echo "Invalid HVIF runtime path found" >&2

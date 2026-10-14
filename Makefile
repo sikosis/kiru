@@ -26,6 +26,7 @@ $(NAME): $(OBJS) $(RSRC)
 install: $(NAME)
 	mkdir -p /boot/home/config/non-packaged/apps
 	cp $(NAME) /boot/home/config/non-packaged/apps/$(NAME)
+	mimeset -f /boot/home/config/non-packaged/apps/$(NAME)
 
 check:
 	sh tests/smoke.sh
