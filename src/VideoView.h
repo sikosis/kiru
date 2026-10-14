@@ -6,14 +6,14 @@
 class BBitmap;
 
 class VideoView : public BView {
-public:
-	VideoView();
+	public:
+		VideoView();
 
-	void Draw(BRect updateRect) override;
-	void SetBitmap(BBitmap* bitmap);
+		void Draw(BRect updateRect) override;
+		void SetBitmap(BBitmap* bitmap);
 
-private:
-	BBitmap* fBitmap;
+	private:
+		BBitmap* fBitmap;
 };
 
 #endif

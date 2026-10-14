@@ -4,19 +4,13 @@
 
 #include <algorithm>
 
-VideoView::VideoView()
-	:
-	BView("video", B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE),
-	fBitmap(nullptr)
-{
+VideoView::VideoView() : BView("video", B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE),	fBitmap(nullptr) {
 	SetViewColor(B_TRANSPARENT_COLOR);
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-VideoView::Draw(BRect updateRect)
-{
+void VideoView::Draw(BRect updateRect) {
 	(void)updateRect;
 	SetHighColor(18, 20, 24);
 	FillRect(Bounds());
@@ -39,9 +33,7 @@ VideoView::Draw(BRect updateRect)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-VideoView::SetBitmap(BBitmap* bitmap)
-{
+void VideoView::SetBitmap(BBitmap* bitmap) {
 	fBitmap = bitmap;
 	Invalidate();
 }

@@ -19,32 +19,30 @@
 #include <cstring>
 
 class IconView : public BView {
-public:
-	IconView(BBitmap* icon);
-	~IconView();
+	public:
+		IconView(BBitmap* icon);
+		~IconView();
 
-	void Draw(BRect updateRect) override;
+		void Draw(BRect updateRect) override;
 
-private:
-	BBitmap* fIcon;
+	private:
+		BBitmap* fIcon;
 };
+
 
 class LinkView : public BStringView {
-public:
-	LinkView(const char* name, const char* label, const char* url);
+	public:
+		LinkView(const char* name, const char* label, const char* url);
 
-	void AttachedToWindow() override;
-	void MouseDown(BPoint point) override;
+		void AttachedToWindow() override;
+		void MouseDown(BPoint point) override;
 
-private:
-	BString fUrl;
+	private:
+		BString fUrl;
 };
 
-IconView::IconView(BBitmap* icon)
-	:
-	BView("application icon", B_WILL_DRAW),
-	fIcon(icon)
-{
+
+IconView::IconView(BBitmap* icon) : BView("application icon", B_WILL_DRAW),	fIcon(icon) {
 	SetViewUIColor(B_PANEL_BACKGROUND_COLOR);
 	SetExplicitMinSize(BSize(96, 96));
 	SetExplicitMaxSize(BSize(96, 96));
@@ -52,16 +50,13 @@ IconView::IconView(BBitmap* icon)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-IconView::~IconView()
-{
+IconView::~IconView() {
 	delete fIcon;
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-IconView::Draw(BRect updateRect)
-{
+void IconView::Draw(BRect updateRect) {
 	(void)updateRect;
 	if (fIcon == nullptr)
 		return;
@@ -72,11 +67,7 @@ IconView::Draw(BRect updateRect)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-LinkView::LinkView(const char* name, const char* label, const char* url)
-	:
-	BStringView(name, label),
-	fUrl(url)
-{
+LinkView::LinkView(const char* name, const char* label, const char* url) :	BStringView(name, label), fUrl(url) {
 	SetToolTip(url);
 	BFont font;
 	GetFont(&font);
@@ -86,9 +77,7 @@ LinkView::LinkView(const char* name, const char* label, const char* url)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-LinkView::AttachedToWindow()
-{
+void LinkView::AttachedToWindow() {
 	BStringView::AttachedToWindow();
 	SetViewUIColor(B_PANEL_BACKGROUND_COLOR);
 	rgb_color background = ui_color(B_PANEL_BACKGROUND_COLOR);
@@ -102,9 +91,7 @@ LinkView::AttachedToWindow()
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-LinkView::MouseDown(BPoint point)
-{
+void LinkView::MouseDown(BPoint point) {
 	(void)point;
 	const char* arguments[] = {fUrl.String()};
 	be_roster->Launch("text/html", 1, arguments);
@@ -112,12 +99,7 @@ LinkView::MouseDown(BPoint point)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-AboutWindow::AboutWindow()
-	:
-	BWindow(BRect(0, 0, 560, 620), "About Kiru", B_TITLED_WINDOW,
-		B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_AUTO_UPDATE_SIZE_LIMITS
-			| B_CLOSE_ON_ESCAPE)
-{
+AboutWindow::AboutWindow() : BWindow(BRect(0, 0, 560, 620), "About Kiru", B_TITLED_WINDOW, B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_AUTO_UPDATE_SIZE_LIMITS | B_CLOSE_ON_ESCAPE) {
 	BBitmap* icon = nullptr;
 	BResources* resources = BApplication::AppResources();
 	if (resources != nullptr) {
@@ -196,8 +178,8 @@ AboutWindow::AboutWindow()
 		.Add(new BSeparatorView(B_HORIZONTAL))
 		.Add(projectHeading)
 		.Add(new BStringView("designer", "Designed by Sikosis"))
-		.Add(new BStringView("created", "Creation Date: 4 October 2026"))
-		.Add(new BStringView("updated", "Updated: 14 October 2026"))
+		.Add(new BStringView("created", "Creation Date: 4th October 2026"))
+		.Add(new BStringView("updated", "Updated: 14th October 2026"))
 		.AddStrut(5.0f)
 		.Add(licenceHeading)
 		.Add(new BStringView("haiku licence",
@@ -216,7 +198,7 @@ AboutWindow::AboutWindow()
 		.AddStrut(5.0f)
 		.Add(thanksHeading)
 		.Add(new BStringView("thanks",
-			"The Haiku, FFmpeg and VideoLAN communities."))
+			"FFmpeg and VideoLAN communities."))
 		.AddGroup(B_HORIZONTAL, 0)
 			.AddGlue()
 			.Add(closeButton)

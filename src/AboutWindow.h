@@ -4,8 +4,8 @@
 #include <Window.h>
 
 class AboutWindow : public BWindow {
-public:
-	AboutWindow();
+	public:
+		AboutWindow();
 };
 
 #endif

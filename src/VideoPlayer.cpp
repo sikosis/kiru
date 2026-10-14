@@ -8,30 +8,18 @@
 #include <algorithm>
 #include <cstring>
 
-VideoPlayer::VideoPlayer()
-	:
-	fVideoTrack(nullptr),
-	fDuration(0),
-	fPosition(0),
-	fDecodedPosition(0),
-	fFrameRate(25.0f),
-	fDecodedBytesPerRow(0),
-	fFrameHeight(0)
-{
+VideoPlayer::VideoPlayer() : fVideoTrack(nullptr), fDuration(0), fPosition(0), fDecodedPosition(0),	fFrameRate(25.0f), fDecodedBytesPerRow(0), fFrameHeight(0) {
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-VideoPlayer::~VideoPlayer()
-{
+VideoPlayer::~VideoPlayer() {
 	Close();
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-VideoPlayer::Close()
-{
+void VideoPlayer::Close() {
 	fBitmap.reset();
 	if (fMediaFile != nullptr && fVideoTrack != nullptr)
 		fMediaFile->ReleaseTrack(fVideoTrack);
@@ -48,9 +36,7 @@ VideoPlayer::Close()
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-status_t
-VideoPlayer::Open(const char* path, BString& error)
-{
+status_t VideoPlayer::Open(const char* path, BString& error) {
 	Close();
 	entry_ref reference;
 	status_t status = get_ref_for_path(path, &reference);
@@ -128,9 +114,7 @@ VideoPlayer::Open(const char* path, BString& error)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-status_t
-VideoPlayer::Seek(bigtime_t position, bool precise)
-{
+status_t VideoPlayer::Seek(bigtime_t position, bool precise) {
 	if (fVideoTrack == nullptr)
 		return B_NO_INIT;
 	bigtime_t frameDuration = std::max<bigtime_t>(1,
@@ -162,9 +146,7 @@ VideoPlayer::Seek(bigtime_t position, bool precise)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-status_t
-VideoPlayer::ReadFrame()
-{
+status_t VideoPlayer::ReadFrame() {
 	if (fVideoTrack == nullptr || fBitmap == nullptr || fFrameBuffer.empty())
 		return B_NO_INIT;
 	int64 totalFrames = fVideoTrack->CountFrames();
@@ -189,49 +171,37 @@ VideoPlayer::ReadFrame()
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-BBitmap*
-VideoPlayer::Bitmap() const
-{
+BBitmap* VideoPlayer::Bitmap() const {
 	return fBitmap.get();
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-bigtime_t
-VideoPlayer::Duration() const
-{
+bigtime_t VideoPlayer::Duration() const {
 	return fDuration;
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-bigtime_t
-VideoPlayer::Position() const
-{
+bigtime_t VideoPlayer::Position() const {
 	return fPosition;
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-float
-VideoPlayer::FrameRate() const
-{
+float VideoPlayer::FrameRate() const {
 	return fFrameRate;
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-bool
-VideoPlayer::IsOpen() const
-{
+bool VideoPlayer::IsOpen() const {
 	return fVideoTrack != nullptr;
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-const BString&
-VideoPlayer::Path() const
-{
+const BString& VideoPlayer::Path() const {
 	return fPath;
 }
 //---------------------------------------------------------------------------------------------------------------------------------//

@@ -5,14 +5,13 @@
 #include <String.h>
 
 class VideoCutter {
-public:
-	static status_t Start(const BString& source, bigtime_t start, bigtime_t end,
-		const BMessenger& target, BString& output, BString& error);
+	public:
+		static status_t Start(const BString& source, bigtime_t start, bigtime_t end, const BMessenger& target, BString& output, BString& error);
 
-private:
-	struct Job;
-	static int32 Run(void* data);
-	static BString OutputPath(const BString& source);
+	private:
+		struct Job;
+		static int32 Run(void* data);
+		static BString OutputPath(const BString& source);
 };
 
 #endif

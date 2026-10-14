@@ -22,9 +22,7 @@ struct VideoCutter::Job {
 	BMessenger target;
 };
 
-BString
-VideoCutter::OutputPath(const BString& source)
-{
+BString VideoCutter::OutputPath(const BString& source) {
 	BPath path(source.String());
 	BString leaf(path.Leaf());
 	int32 dot = leaf.FindLast('.');
@@ -49,10 +47,7 @@ VideoCutter::OutputPath(const BString& source)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-status_t
-VideoCutter::Start(const BString& source, bigtime_t start, bigtime_t end,
-	const BMessenger& target, BString& output, BString& error)
-{
+status_t VideoCutter::Start(const BString& source, bigtime_t start, bigtime_t end, const BMessenger& target, BString& output, BString& error) {
 	output = OutputPath(source);
 	if (output.IsEmpty()) {
 		error = "Could not choose an output filename.";
@@ -80,9 +75,7 @@ VideoCutter::Start(const BString& source, bigtime_t start, bigtime_t end,
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-int32
-VideoCutter::Run(void* data)
-{
+int32 VideoCutter::Run(void* data) {
 	std::unique_ptr<Job> job(static_cast<Job*>(data));
 	pid_t child = fork();
 	int exitCode = -1;

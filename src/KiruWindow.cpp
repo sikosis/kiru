@@ -34,21 +34,19 @@ static const char* kVLCSignature = "application/x-vnd.vlc";
 static const char* kLegacyVLCSignature = "application/x-vnd.videolan-vlc";
 
 class OutputLinkView : public BStringView {
-public:
-	OutputLinkView();
+	public:
+		OutputLinkView();
 
-	void AttachedToWindow() override;
-	void MouseDown(BPoint point) override;
-	void SetOutput(const char* output);
+		void AttachedToWindow() override;
+		void MouseDown(BPoint point) override;
+		void SetOutput(const char* output);
 
-private:
-	BString fOutput;
+	private:
+		BString fOutput;
 };
 
-OutputLinkView::OutputLinkView()
-	:
-	BStringView("output link", "")
-{
+
+OutputLinkView::OutputLinkView() : BStringView("output link", "") {
 	BFont font;
 	GetFont(&font);
 	font.SetFace(font.Face() | B_UNDERSCORE_FACE);
@@ -154,18 +152,7 @@ static bool FindVLC(entry_ref& reference) {
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
-KiruWindow::KiruWindow()
-	:
-	BWindow(BRect(100, 100, 980, 680), "Kiru", B_TITLED_WINDOW,
-		B_AUTO_UPDATE_SIZE_LIMITS | B_ASYNCHRONOUS_CONTROLS),
-	fInPoint(-1),
-	fOutPoint(-1),
-	fScrubPosition(0),
-	fTickInterval(40000),
-	fPlaying(false),
-	fCutting(false),
-	fScrubbing(false)
-{
+KiruWindow::KiruWindow() : BWindow(BRect(100, 100, 980, 680), "Kiru", B_TITLED_WINDOW, B_AUTO_UPDATE_SIZE_LIMITS | B_ASYNCHRONOUS_CONTROLS), fInPoint(-1), fOutPoint(-1), fScrubPosition(0), fTickInterval(40000), fPlaying(false), fCutting(false), fScrubbing(false) {
 	fVideoView = new VideoView();
 	fTimeline = new BSlider("timeline", nullptr, new BMessage(MSG_SEEK), 0,
 		kTimelineResolution, B_HORIZONTAL);
@@ -224,15 +211,12 @@ KiruWindow::KiruWindow()
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-KiruWindow::~KiruWindow()
-{
+KiruWindow::~KiruWindow() {
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::DispatchMessage(BMessage* message, BHandler* handler)
-{
+void KiruWindow::DispatchMessage(BMessage* message, BHandler* handler) {
 	if (message->what == B_KEY_DOWN) {
 		int32 keyModifiers = 0;
 		message->FindInt32("modifiers", &keyModifiers);
@@ -299,18 +283,14 @@ KiruWindow::DispatchMessage(BMessage* message, BHandler* handler)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-bool
-KiruWindow::QuitRequested()
-{
+bool KiruWindow::QuitRequested() {
 	be_app->PostMessage(B_QUIT_REQUESTED);
 	return true;
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::MessageReceived(BMessage* message)
-{
+void KiruWindow::MessageReceived(BMessage* message) {
 	switch (message->what) {
 		case MSG_OPEN:
 			fOpenPanel->Show();
@@ -417,9 +397,7 @@ KiruWindow::MessageReceived(BMessage* message)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::OpenFile(const char* path)
-{
+void KiruWindow::OpenFile(const char* path) {
 	fPlaying = false;
 	fScrubbing = false;
 	fScrubPosition = 0;
@@ -446,9 +424,7 @@ KiruWindow::OpenFile(const char* path)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::Seek(bigtime_t position, bool precise)
-{
+void KiruWindow::Seek(bigtime_t position, bool precise) {
 	if (!fPlayer.IsOpen())
 		return;
 	fScrubbing = false;
@@ -467,9 +443,7 @@ KiruWindow::Seek(bigtime_t position, bool precise)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::TogglePlayback()
-{
+void KiruWindow::TogglePlayback() {
 	if (!fPlayer.IsOpen())
 		return;
 	if (!fPlaying) {
@@ -491,9 +465,7 @@ KiruWindow::TogglePlayback()
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::SetMark(bool isInMark)
-{
+void KiruWindow::SetMark(bool isInMark) {
 	if (!fPlayer.IsOpen())
 		return;
 	if (isInMark)
@@ -509,9 +481,7 @@ KiruWindow::SetMark(bool isInMark)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::Chop()
-{
+void KiruWindow::Chop() {
 	if (!fPlayer.IsOpen() || fInPoint < 0 || fOutPoint <= fInPoint || fCutting)
 		return;
 	fPlaying = false;
@@ -533,9 +503,7 @@ KiruWindow::Chop()
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::Tick()
-{
+void KiruWindow::Tick() {
 	fTicker.reset();
 	if (!fPlaying || !fPlayer.IsOpen())
 		return;
@@ -565,9 +533,7 @@ void KiruWindow::ScheduleTick() {
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::ShowAbout()
-{
+void KiruWindow::ShowAbout() {
 	AboutWindow* window = new AboutWindow();
 	window->Show();
 }
@@ -646,9 +612,7 @@ status_t KiruWindow::OpenWithApplication(const char* output,
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-status_t
-KiruWindow::ShowInTracker(const char* output)
-{
+status_t KiruWindow::ShowInTracker(const char* output) {
 	BEntry file(output, true);
 	status_t status = file.InitCheck();
 	if (status != B_OK)
@@ -678,9 +642,7 @@ KiruWindow::ShowInTracker(const char* output)
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::UpdateInterface()
-{
+void KiruWindow::UpdateInterface() {
 	if (!fPlayer.IsOpen())
 		return;
 	bigtime_t position = CurrentPosition();
@@ -702,25 +664,19 @@ KiruWindow::UpdateInterface()
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-bigtime_t
-KiruWindow::CurrentPosition() const
-{
+bigtime_t KiruWindow::CurrentPosition() const {
 	return fScrubbing ? fScrubPosition : fPlayer.Position();
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-void
-KiruWindow::SetStatus(const char* text)
-{
+void KiruWindow::SetStatus(const char* text) {
 	fStatusLabel->SetText(text);
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
 
-BString
-KiruWindow::TimeText(bigtime_t time) const
-{
+BString KiruWindow::TimeText(bigtime_t time) const {
 	int64 milliseconds = std::max<bigtime_t>(0, time) / 1000;
 	int64 hours = milliseconds / 3600000;
 	int64 minutes = milliseconds / 60000 % 60;

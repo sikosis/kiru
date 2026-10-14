@@ -49,23 +49,20 @@ static status_t LaunchFFmpegInstaller() {
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
+
 class KiruApp : public BApplication {
-public:
-	KiruApp();
+	public:
+		KiruApp();
 
-	void ArgvReceived(int32 argc, char** argv) override;
-	void RefsReceived(BMessage* message) override;
-	void ReadyToRun() override;
+		void ArgvReceived(int32 argc, char** argv) override;
+		void RefsReceived(BMessage* message) override;
+		void ReadyToRun() override;
 
-private:
-	KiruWindow* fWindow;
+	private:
+		KiruWindow* fWindow;
 };
 
-KiruApp::KiruApp()
-	:
-	BApplication("application/x-vnd.sikosis-kiru"),
-	fWindow(nullptr)
-{
+KiruApp::KiruApp() : BApplication("application/x-vnd.sikosis-kiru"), fWindow(nullptr) {
 }
 //---------------------------------------------------------------------------------------------------------------------------------//
 
@@ -92,7 +89,7 @@ void KiruApp::RefsReceived(BMessage* message) {
 
 void KiruApp::ReadyToRun() {
 	if (!FFmpegIsInstalled()) {
-		BAlert* alert = new BAlert("FFmpeg required",
+		BAlert* alert = new BAlert("FFmpeg Required",
 			"Kiru needs FFmpeg to create chopped video files, but it was not "
 			"found in PATH.\n\nInstall it now by opening Terminal and running:\n\n"
 			"pkgman install ffmpeg",

@@ -11,35 +11,35 @@ class BBitmap;
 class BMediaTrack;
 
 class VideoPlayer {
-public:
-	VideoPlayer();
-	~VideoPlayer();
+	public:
+		VideoPlayer();
+		~VideoPlayer();
 
-	status_t Open(const char* path, BString& error);
-	status_t Seek(bigtime_t position, bool precise = true);
-	status_t ReadFrame();
+		status_t Open(const char* path, BString& error);
+		status_t Seek(bigtime_t position, bool precise = true);
+		status_t ReadFrame();
 
-	BBitmap* Bitmap() const;
-	bigtime_t Duration() const;
-	bigtime_t Position() const;
-	float FrameRate() const;
-	bool IsOpen() const;
-	const BString& Path() const;
+		BBitmap* Bitmap() const;
+		bigtime_t Duration() const;
+		bigtime_t Position() const;
+		float FrameRate() const;
+		bool IsOpen() const;
+		const BString& Path() const;
 
-private:
-	void Close();
+	private:
+		void Close();
 
-	std::unique_ptr<BMediaFile> fMediaFile;
-	BMediaTrack* fVideoTrack;
-	std::unique_ptr<BBitmap> fBitmap;
-	BString fPath;
-	bigtime_t fDuration;
-	bigtime_t fPosition;
-	bigtime_t fDecodedPosition;
-	float fFrameRate;
-	int32 fDecodedBytesPerRow;
-	int32 fFrameHeight;
-	std::vector<uint8> fFrameBuffer;
+		std::unique_ptr<BMediaFile> fMediaFile;
+		BMediaTrack* fVideoTrack;
+		std::unique_ptr<BBitmap> fBitmap;
+		BString fPath;
+		bigtime_t fDuration;
+		bigtime_t fPosition;
+		bigtime_t fDecodedPosition;
+		float fFrameRate;
+		int32 fDecodedBytesPerRow;
+		int32 fFrameHeight;
+		std::vector<uint8> fFrameBuffer;
 };
 
 #endif
